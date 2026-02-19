@@ -1,23 +1,29 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	type Location = {
-		lat: number, lon: number, location: string
-	}
+		lat: number;
+		lon: number;
+		location: string;
+	};
 
 	type Weather = {
-		location: Location,
-		temperature: number | null,
-		feelsLike: number | null,
-		conditionEmoji: string | null,
-		conditionLabel: string | null
-	}
+		location: Location;
+		temperature: number | null;
+		feelsLike: number | null;
+		conditionEmoji: string | null;
+		conditionLabel: string | null;
+	};
 
-	const LOCATIONS: Array<Location> = [{lat: 60.1699, lon: 24.9384, location: 'Järvenpää'}, {lat: 60.1708, lon: 24.9375, location: 'Helsinki'}];
-	
+	const LOCATIONS: Array<Location> = [
+		{ lat: 60.1699, lon: 24.9384, location: 'Järvenpää' },
+		{ lat: 60.1708, lon: 24.9375, location: 'Helsinki' }
+	];
+
 	const weathers: Array<Weather> = [];
 	let loading = true;
 	let error = '';
+	let refreshTimer: number | null = null;
 
 	async function fetchWeather(location: Location) {
 		try {
@@ -90,7 +96,7 @@
 			} else {
 				throw new Error('No current weather available');
 			}
-			weathers.push({location, temperature, feelsLike, conditionEmoji, conditionLabel});
+			weathers.push({ location, temperature, feelsLike, conditionEmoji, conditionLabel });
 			console.log(weathers);
 		} catch (e) {
 			error = e.message || String(e);
@@ -98,8 +104,26 @@
 	}
 
 	onMount(async () => {
-		await Promise.all(LOCATIONS.map(loc => fetchWeather(loc)));
+		await Promise.all(LOCATIONS.map((loc) => fetchWeather(loc)));
 		loading = false;
+
+		// Refresh weather data every hour
+		refreshTimer = window.setInterval(
+			async () => {
+				try {
+					weathers.length = 0; // clear previous results
+					error = '';
+					await Promise.all(LOCATIONS.map((loc) => fetchWeather(loc)));
+				} catch (e) {
+					console.error('Hourly refresh failed', e);
+				}
+			},
+			60 * 60 * 1000
+		);
+	});
+
+	onDestroy(() => {
+		if (refreshTimer !== null) window.clearInterval(refreshTimer);
 	});
 </script>
 
@@ -108,10 +132,10 @@
 		<div>Loading weather data…</div>
 	{:else if error}
 		<div class="error">Error: {error}</div>
-	{:else }
+	{:else}
 		{#each weathers as weather}
 			{#if weather.temperature}
-			<div class="temp">{Math.round(weather.temperature)} °C</div>
+				<div class="temp">{Math.round(weather.temperature)} °C</div>
 			{/if}
 			{#if typeof weather.feelsLike === 'number'}
 				<div class="feels">Feels like {Math.round(weather.feelsLike)} °C</div>
@@ -132,6 +156,8 @@
 			'Segoe UI',
 			Roboto,
 			Arial;
+		padding: 0.5rem 1rem;
+		background: lightskyblue;
 	}
 	.temp {
 		font-size: 1.25rem;

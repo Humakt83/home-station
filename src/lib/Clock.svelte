@@ -32,7 +32,6 @@
 		color: red;
 		background: black;
 		padding: 1rem 2rem;
-		border-radius: 0.25rem;
 		width: fit;
 	}
 </style>
