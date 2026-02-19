@@ -1,21 +1,36 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	type Location = {
+		lat: number, lon: number, location: string
+	}
+
+	type Weather = {
+		location: Location,
+		temperature: number | null,
+		feelsLike: number | null,
+		conditionEmoji: string | null,
+		conditionLabel: string | null
+	}
+
+	const LOCATIONS: Array<Location> = [{lat: 60.1699, lon: 24.9384, location: 'Järvenpää'}, {lat: 60.1708, lon: 24.9375, location: 'Helsinki'}];
+	
+	const weathers: Array<Weather> = [];
 	let loading = true;
 	let error = '';
-	let temperature: number | null = null; // in °C
-	let feelsLike: number | null = null; // apparent temperature in °C
-	let locationLabel = '';
 
-	async function fetchWeather(lat: number, lon: number) {
+	async function fetchWeather(location: Location) {
 		try {
-			const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=apparent_temperature&timezone=auto`;
+			const url = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current_weather=true&hourly=apparent_temperature&timezone=auto`;
 			const res = await fetch(url);
+			let temperature: number | null = null;
+			let feelsLike: number | null = null;
+			let conditionEmoji: string = '';
+			let conditionLabel: string = '';
 			if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
 			const data = await res.json();
 			if (data && data.current_weather && typeof data.current_weather.temperature !== 'undefined') {
 				temperature = data.current_weather.temperature;
-				locationLabel = data.timezone || '';
 
 				// Try to extract apparent temperature (feels like) from hourly data
 				if (
@@ -46,57 +61,66 @@
 						feelsLike = apparent;
 					}
 				}
+
+				// Map Open-Meteo weathercode to a simple condition emoji and label
+				if (data.current_weather && typeof data.current_weather.weathercode !== 'undefined') {
+					const code: number = data.current_weather.weathercode;
+					function mapCode(c: number) {
+						// Snow: 71-77, 85-86
+						if ((c >= 71 && c <= 77) || c === 85 || c === 86)
+							return { emoji: '❄️', label: 'Snowing' };
+						// Rain/drizzle/showers/thunder: 51-67, 80-82, 95-99
+						if (
+							(c >= 51 && c <= 57) ||
+							(c >= 61 && c <= 67) ||
+							(c >= 80 && c <= 82) ||
+							(c >= 95 && c <= 99)
+						)
+							return { emoji: '🌧️', label: 'Raining' };
+						// Clear
+						if (c === 0) return { emoji: '☀️', label: 'Sunny' };
+						// Default to cloudy for other codes
+						return { emoji: '☁️', label: 'Cloudy' };
+					}
+
+					const result = mapCode(code);
+					conditionEmoji = result.emoji;
+					conditionLabel = result.label;
+				}
 			} else {
 				throw new Error('No current weather available');
 			}
+			weathers.push({location, temperature, feelsLike, conditionEmoji, conditionLabel});
+			console.log(weathers);
 		} catch (e) {
 			error = e.message || String(e);
-		} finally {
-			loading = false;
 		}
 	}
 
-	function useFallback() {
-		// Fallback to Helsinki coordinates if geolocation is unavailable/denied
-		const helsinki = { lat: 60.1699, lon: 24.9384 };
-		locationLabel = 'Helsinki (fallback)';
-		return fetchWeather(helsinki.lat, helsinki.lon);
-	}
-
-	onMount(() => {
-		if (!navigator.geolocation) {
-			error = 'Geolocation not supported by this browser.';
-			return useFallback();
-		}
-
-		navigator.geolocation.getCurrentPosition(
-			(pos) => {
-				const { latitude, longitude } = pos.coords;
-				fetchWeather(latitude, longitude);
-			},
-			(err) => {
-				console.error(err);
-				// If user denies, fallback
-				useFallback();
-			},
-			{ enableHighAccuracy: false, timeout: 10000 }
-		);
+	onMount(async () => {
+		await Promise.all(LOCATIONS.map(loc => fetchWeather(loc)));
+		loading = false;
 	});
 </script>
 
 <div class="weather">
 	{#if loading}
-		<div>Loading local weather…</div>
+		<div>Loading weather data…</div>
 	{:else if error}
 		<div class="error">Error: {error}</div>
-	{:else if temperature}
-		<div class="temp">{Math.round(temperature)} °C</div>
-		{#if typeof feelsLike === 'number'}
-			<div class="feels">Feels like {Math.round(feelsLike)} °C</div>
-		{/if}
-		{#if locationLabel}
-			<div class="loc">{locationLabel}</div>
-		{/if}
+	{:else }
+		{#each weathers as weather}
+			{#if weather.temperature}
+			<div class="temp">{Math.round(weather.temperature)} °C</div>
+			{/if}
+			{#if typeof weather.feelsLike === 'number'}
+				<div class="feels">Feels like {Math.round(weather.feelsLike)} °C</div>
+			{/if}
+			{#if weather.conditionEmoji}
+				<div class="cond">{weather.conditionEmoji} {weather.conditionLabel}</div>
+			{/if}
+			<div class="loc">{weather.location.location}</div>
+		{/each}
 	{/if}
 </div>
 
@@ -115,6 +139,10 @@
 	}
 	.feels {
 		font-size: 1rem;
+	}
+	.cond {
+		font-size: 1.25rem;
+		margin-top: 0.25rem;
 	}
 	.error {
 		color: #b00020;
