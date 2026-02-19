@@ -97,7 +97,6 @@
 				throw new Error('No current weather available');
 			}
 			weathers.push({ location, temperature, feelsLike, conditionEmoji, conditionLabel });
-			console.log(weathers);
 		} catch (e) {
 			error = e.message || String(e);
 		}
