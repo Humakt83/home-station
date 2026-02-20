@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { formatDate } from 'date-fns';
 
 	const time = writable(new Date());
 	let timer: NodeJS.Timeout;
@@ -13,8 +14,8 @@
 </script>
 
 <div class="clock">
-	{#if $time}
-		<time datetime={$time.toISOString()}>{$time.toLocaleTimeString('fi-FI')}</time>
+	{#if time}
+		<time datetime={$time.toISOString()}>{formatDate($time, 'HH:mm:ss')}</time>
 	{/if}
 </div>
 
