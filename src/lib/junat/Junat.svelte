@@ -36,7 +36,7 @@
 				{#each departures as d (d.scheduledTime)}
 					<li>
 						<span class="time">{formatDate(d.scheduledTime, 'HH:mm')}</span>
-						<span class="train">{d.train.commuterLineID ?? ''}</span>
+						<span class="train">{d.train?.commuterLineID ?? ''}</span>
 						<span class="destination">{d.destination ?? ''}</span>
 					</li>
 				{/each}
