@@ -4,7 +4,7 @@
 	type Location = {
 		lat: number;
 		lon: number;
-		location: string;
+		city: string;
 	};
 
 	type Weather = {
@@ -16,8 +16,8 @@
 	};
 
 	const LOCATIONS: Array<Location> = [
-		{ lat: 60.1699, lon: 24.9384, location: 'Järvenpää' },
-		{ lat: 60.1708, lon: 24.9375, location: 'Helsinki' }
+		{ lat: 60.1699, lon: 24.9384, city: 'Järvenpää' },
+		{ lat: 60.1708, lon: 24.9375, city: 'Helsinki' }
 	];
 
 	const weathers: Array<Weather> = [];
@@ -132,7 +132,7 @@
 	{:else if error}
 		<div class="error">Error: {error}</div>
 	{:else}
-		{#each weathers as weather}
+		{#each weathers as weather (weather.location.city)}
 			{#if weather.temperature}
 				<div class="temp">{Math.round(weather.temperature)} °C</div>
 			{/if}
@@ -142,7 +142,7 @@
 			{#if weather.conditionEmoji}
 				<div class="cond">{weather.conditionEmoji} {weather.conditionLabel}</div>
 			{/if}
-			<div class="loc">{weather.location.location}</div>
+			<div class="loc">{weather.location.city}</div>
 		{/each}
 	{/if}
 </div>

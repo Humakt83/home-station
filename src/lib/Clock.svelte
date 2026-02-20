@@ -14,7 +14,7 @@
 </script>
 
 <div class="clock">
-	{#if time}
+	{#if $time}
 		<time datetime={$time.toISOString()}>{formatDate($time, 'HH:mm:ss')}</time>
 	{/if}
 </div>

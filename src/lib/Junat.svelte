@@ -21,6 +21,14 @@
 		TL: 'Toijala'
 	};
 
+	type ResponseTimeTableRow = {
+		trainStopping: boolean;
+		stationShortCode: string;
+		type: string;
+		scheduledTime: string;
+		liveEstimateTime: string;
+	};
+
 	let loading = true;
 	let error: string | null = null;
 	let stationName: string | null = null;
@@ -32,7 +40,7 @@
 		'https://rata.digitraffic.fi/api/v1/live-trains?station=JP&arrived_trains=1&arriving_trains=50&departing_trains=50&departing_trains=5';
 	const JUNA = 'https://rata.digitraffic.fi/api/v1/trains';
 
-	function isLegitDeparture(tr) {
+	function isLegitDeparture(tr: ResponseTimeTableRow): boolean {
 		return (
 			tr.trainStopping &&
 			tr.stationShortCode === 'JP' &&
@@ -41,8 +49,8 @@
 		);
 	}
 
-	function determineDestination(tr) {
-		return STATION_TO_CITY[tr.stationShortCode];
+	function determineDestination(tr: ResponseTimeTableRow): string {
+		return STATION_TO_CITY[tr.stationShortCode as keyof typeof STATION_TO_CITY] ?? '';
 	}
 
 	async function fetchTrain(trainNumber: number, dateNow: string): Promise<Train> {
@@ -60,35 +68,34 @@
 			headers: { 'Content-Type': 'application/json' }
 		});
 		if (!res.ok) throw new Error(`stop departures error ${res.status}`);
-		const data = await res.json();
+		const data: Array<{ trainNumber: number; timeTableRows: Array<ResponseTimeTableRow> }> =
+			await res.json();
 		const departureData = data
 			.filter((train) => !!train.timeTableRows.find(isLegitDeparture))
 			.map((train) => {
 				const sortedRows = train.timeTableRows.sort(
-					(a, b) => a.scheduledTime.valueOf() - b.scheduledTime.valueOf()
+					(a, b) => new Date(a.scheduledTime).valueOf() - new Date(b.scheduledTime).valueOf()
 				);
 				const rows = train.timeTableRows.filter(isLegitDeparture);
 				const last = sortedRows[sortedRows.length - 1];
 				return { ...train, timeTableRows: rows.concat(last) };
 			});
-		console.log(departureData.length);
-		console.log(departureData[0]);
-		const out: Departure[] = departureData.map((dd) => {
+		const departures: Departure[] = departureData.map((dd) => {
 			const firstTime = dd.timeTableRows[0];
 			const destination = determineDestination(dd.timeTableRows[1]);
 			return {
 				liveEstimateTime: new Date(firstTime.liveEstimateTime),
 				scheduledTime: new Date(firstTime.scheduledTime),
 				destination,
-				train: { trainNumber: dd.trainNumber }
+				train: { trainNumber: dd.trainNumber } as Train
 			};
 		});
-		const sorted = out
+		const sortedDepartures = departures
 			.sort((a, b) => a.scheduledTime.valueOf() - b.scheduledTime.valueOf())
 			.slice(0, 10);
 		const dateNow = formatDate(new Date(), 'yyyy-MM-dd');
 		return await Promise.all(
-			sorted.map(async (dd) => {
+			sortedDepartures.map(async (dd) => {
 				let train: Train | undefined = trainNumberToCommuterLineId.find(
 					(t) => t.trainNumber === dd.train.trainNumber
 				);
@@ -125,7 +132,7 @@
 			<div>No upcoming departures found.</div>
 		{:else}
 			<ul>
-				{#each departures as d}
+				{#each departures as d (d.scheduledTime)}
 					<li>
 						<span class="time">{formatDate(d.scheduledTime, 'HH:mm')}</span>
 						<span class="train">{d.train.commuterLineID ?? ''}</span>
