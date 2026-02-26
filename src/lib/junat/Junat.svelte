@@ -24,7 +24,7 @@
 <div class="junat">
 	<div class="title">Lähtevät Junat</div>
 	{#if loading}
-		<div>Loading departures…</div>
+		<div>Ladataan…</div>
 	{:else if error}
 		<div class="error">{error}</div>
 	{:else}
@@ -36,7 +36,7 @@
 				{#each departures as d (d.scheduledTime)}
 					<li>
 						<span class="time">{formatDate(d.scheduledTime, 'HH:mm')}</span>
-						<span class="train">{d.train.commuterLineID ?? ''}</span>
+						<span class="train">{d.train?.commuterLineID ?? ''}</span>
 						<span class="destination">{d.destination ?? ''}</span>
 					</li>
 				{/each}
