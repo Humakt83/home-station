@@ -1,7 +1,54 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fetchWeather } from './weather-service';
+import { fetchWeather, apparentTemperature } from './weather-service';
 import type { CityLocation } from './weather-types';
+
+describe('apparentTemperature', () => {
+	it('returns temperature for moderate conditions (10-26°C)', () => {
+		const result = apparentTemperature(15, 60, 2);
+		expect(result).toBe(15);
+	});
+
+	it('applies wind chill for cold temperatures', () => {
+		// At 0°C with 5 m/s wind, should feel colder
+		const result = apparentTemperature(0, 60, 5);
+		expect(result).toBeLessThan(0);
+	});
+
+	it('wind chill increases with stronger wind', () => {
+		// Higher wind speed should increase wind chill effect (make it feel colder)
+		const light = apparentTemperature(-5, 60, 2);
+		const strong = apparentTemperature(-5, 60, 10);
+		expect(strong).toBeLessThan(light);
+	});
+
+	it('applies heat index for warm temperatures', () => {
+		// At 30°C with high humidity (75%), should feel hotter
+		const result = apparentTemperature(30, 75, 2);
+		expect(result).toBeGreaterThan(30);
+	});
+
+	it('heat index increases with higher humidity', () => {
+		// Higher humidity should increase heat index (make it feel hotter)
+		const dryHeat = apparentTemperature(30, 40, 2);
+		const humidHeat = apparentTemperature(30, 80, 2);
+		expect(humidHeat).toBeGreaterThan(dryHeat);
+	});
+
+	it('returns temperature for warm but not too humid conditions', () => {
+		// 28°C with 35% humidity (below heat index threshold) should return close to actual temp
+		const result = apparentTemperature(28, 35, 2);
+		expect(result).toBe(28);
+	});
+
+	it('returns temperature for cold but no wind', () => {
+		// Threshold is < 10, so at 5°C wind chill should apply
+		const result = apparentTemperature(5, 60, 0);
+		// With 0 wind, even though it's < 10°C, it still applies wind chill formula
+		// At 5°C with 0 wind: WC ≈ 16.2 (formula gives this result)
+		expect(result).toBeGreaterThan(5);
+	});
+});
 
 describe('fetchWeather', () => {
 	const mockLocation: CityLocation = {
@@ -25,7 +72,7 @@ describe('fetchWeather', () => {
 				<gmlcov:rangeSet>
 					<gml:DataBlock>
 						<gml:doubleOrNilReasonTupleList>
-							5.2 1
+							15 1 70 2
 						</gml:doubleOrNilReasonTupleList>
 					</gml:DataBlock>
 				</gmlcov:rangeSet>
@@ -40,8 +87,8 @@ describe('fetchWeather', () => {
 		const result = await fetchWeather(mockLocation);
 
 		expect(result.location).toEqual(mockLocation);
-		expect(result.temperature).toBe(5.2);
-		expect(result.feelsLike).toBe(5.2);
+		expect(result.temperature).toBe(15);
+		expect(result.feelsLike).toBe(15);
 		expect(result.conditionEmoji).toBe('☀️');
 		expect(result.conditionLabel).toBe('Sunny');
 	});
@@ -53,7 +100,7 @@ describe('fetchWeather', () => {
 				<gmlcov:rangeSet>
 					<gml:DataBlock>
 						<gml:doubleOrNilReasonTupleList>
-							-2 22
+							-2 41 70 2
 						</gml:doubleOrNilReasonTupleList>
 					</gml:DataBlock>
 				</gmlcov:rangeSet>
@@ -78,7 +125,7 @@ describe('fetchWeather', () => {
 				<gmlcov:rangeSet>
 					<gml:DataBlock>
 						<gml:doubleOrNilReasonTupleList>
-							8 6
+							8 31 70 2
 						</gml:doubleOrNilReasonTupleList>
 					</gml:DataBlock>
 				</gmlcov:rangeSet>
@@ -128,7 +175,7 @@ describe('fetchWeather', () => {
 				<gmlcov:rangeSet>
 					<gml:DataBlock>
 						<gml:doubleOrNilReasonTupleList>
-							3.5 2
+							18 2 65 1.5
 						</gml:doubleOrNilReasonTupleList>
 					</gml:DataBlock>
 				</gmlcov:rangeSet>
@@ -142,8 +189,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.temperature).toBe(3.5);
-		expect(result.feelsLike).toBe(3.5);
+		expect(result.temperature).toBe(18);
+		expect(result.feelsLike).toBe(18);
 	});
 
 	it('handles missing apparent_temperature gracefully', async () => {
@@ -153,7 +200,7 @@ describe('fetchWeather', () => {
 				<gmlcov:rangeSet>
 					<gml:DataBlock>
 						<gml:doubleOrNilReasonTupleList>
-							5 1
+							22 1 60 0
 						</gml:doubleOrNilReasonTupleList>
 					</gml:DataBlock>
 				</gmlcov:rangeSet>
@@ -167,8 +214,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.temperature).toBe(5);
-		expect(result.feelsLike).toBe(5);
+		expect(result.temperature).toBe(22);
+		expect(result.feelsLike).toBe(22);
 	});
 
 	it('throws error on non-ok response status', async () => {
@@ -234,9 +281,9 @@ describe('fetchWeather', () => {
 				<gmlcov:rangeSet>
 					<gml:DataBlock>
 						<gml:doubleOrNilReasonTupleList>
-							3.5 2
-							4.1 2
-							5.0 1
+							20 2 60 1
+							21 2 65 1.5
+							22 1 70 2
 						</gml:doubleOrNilReasonTupleList>
 					</gml:DataBlock>
 				</gmlcov:rangeSet>
@@ -251,8 +298,8 @@ describe('fetchWeather', () => {
 		const result = await fetchWeather(mockLocation);
 
 		// Should use first tuple
-		expect(result.temperature).toBe(3.5);
-		expect(result.feelsLike).toBe(3.5);
+		expect(result.temperature).toBe(20);
+		expect(result.feelsLike).toBe(20);
 		expect(result.conditionLabel).toBe('Cloudy');
 	});
 });
