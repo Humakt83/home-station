@@ -168,6 +168,56 @@ describe('fetchWeather', () => {
 		expect(result.conditionLabel).toBe('Cloudy');
 	});
 
+	it('maps FMI weather symbol 71 (sleet) correctly', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							-1 71 70 3
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
+
+		global.fetch = vi.fn().mockResolvedValue({
+			ok: true,
+			text: async () => fmiXml
+		});
+
+		const result = await fetchWeather(mockLocation);
+
+		expect(result.conditionEmoji).toBe('🌨️');
+		expect(result.conditionLabel).toBe('Sleet');
+	});
+
+	it('maps FMI weather symbol 91 (fog) correctly', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							8 91 85 1
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
+
+		global.fetch = vi.fn().mockResolvedValue({
+			ok: true,
+			text: async () => fmiXml
+		});
+
+		const result = await fetchWeather(mockLocation);
+
+		expect(result.conditionEmoji).toBe('🌫️');
+		expect(result.conditionLabel).toBe('Fog');
+	});
+
 	it('finds nearest hourly timestamp when exact match not found', async () => {
 		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
 		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">

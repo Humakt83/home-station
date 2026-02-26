@@ -96,14 +96,16 @@ export async function fetchWeather(location: CityLocation): Promise<Weather> {
 		feelsLike = apparentTemperature(temperature, humidity, windspeedms);
 
 		// Map weather symbol to emoji and label
-		// FMI weather symbols: 1=clear, 2=partly cloudy, 3=cloudy, 4=drizzle, 5=light rain, 6=rain, 7=heavy rain
-		// 21=light snow, 22=snow, 23=heavy snow, 31=thunder, etc.
+		// FMI weather symbols: 1=clear, 2=partly cloudy, 3=cloudy
+		// 31-33=rain, 41-53=snow, 61-64=thunderstorm, 71-83=sleet, 91-92=fog
 		function mapWeatherSymbol(symbol: number) {
 			if (symbol === 1) return { emoji: '☀️', label: 'Sunny' };
 			if (symbol === 2 || symbol === 3) return { emoji: '☁️', label: 'Cloudy' };
 			if (symbol >= 31 && symbol <= 33) return { emoji: '🌧️', label: 'Raining' };
 			if (symbol >= 41 && symbol <= 53) return { emoji: '❄️', label: 'Snowing' };
 			if (symbol >= 61 && symbol <= 64) return { emoji: '⛈️', label: 'Thunderstorm' };
+			if (symbol >= 71 && symbol <= 83) return { emoji: '🌨️', label: 'Sleet' };
+			if (symbol >= 91 && symbol <= 92) return { emoji: '🌫️', label: 'Fog' };
 			return { emoji: '☁️', label: 'Cloudy' };
 		}
 
