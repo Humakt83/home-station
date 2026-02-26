@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+  type DrawingColors = 'black' | 'red' | 'blue' | 'green'
+
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
 	let drawing = false;
+	let currentColor: DrawingColors = 'black';
 
 	function startDrawing(event: MouseEvent | TouchEvent) {
 		drawing = true;
@@ -17,7 +21,7 @@
 		const pos = getPos(event);
 		ctx.lineWidth = 5;
 		ctx.lineTo(pos.x, pos.y);
-		ctx.strokeStyle = 'black';
+		ctx.strokeStyle = currentColor;
 		ctx.stroke();
 	}
 
@@ -25,6 +29,14 @@
 		drawing = false;
 		ctx.closePath();
 		console.debug('Stopped drawing');
+	}
+
+	function clearDrawing() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	}
+
+	function setColor(color: DrawingColors) {
+		currentColor = color;
 	}
 
 	function getPos(e: MouseEvent | TouchEvent) {
@@ -69,6 +81,13 @@
 </script>
 
 <div class="note">
+	<div class="controls">
+		<button on:click={clearDrawing}>🗑️</button>
+		<button on:click={() => setColor('black')} class:active={currentColor === 'black'}>⚫</button>
+		<button on:click={() => setColor('red')} class:active={currentColor === 'red'}>🔴</button>
+    <button on:click={() => setColor('blue')} class:active={currentColor === 'blue'}>🔵</button>
+    <button on:click={() => setColor('green')} class:active={currentColor === 'green'}>🟢</button>
+	</div>
 	<canvas
 		bind:this={canvas}
 		on:mousedown={startDrawing}
@@ -87,10 +106,34 @@
 		border: 3px solid #ccc;
 		width: 100%;
 		height: 400px;
+		display: flex;
+		flex-direction: column;
+	}
+	.controls {
+		display: flex;
+		gap: 8px;
+		padding: 8px;
+		background: #f5f5f5;
+		border-bottom: 1px solid #ddd;
+	}
+	button {
+		padding: 6px 12px;
+		border: 2px solid #ccc;
+		background: white;
+		cursor: pointer;
+		border-radius: 4px;
+		font-size: 16px;
+		transition: all 0.2s;
+	}
+	button:hover {
+		background: #f0f0f0;
+	}
+	button.active {
+		border-color: #333;
+		background: #e0e0e0;
 	}
 	canvas {
 		touch-action: none;
-		width: 100%;
-		height: 400px;
+		flex: 1;
 	}
 </style>
