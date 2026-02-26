@@ -13,7 +13,6 @@
 		const pos = getPos(event);
 		ctx.beginPath();
 		ctx.moveTo(pos.x, pos.y);
-		console.debug('Start drawing');
 	}
 
 	function draw(event: MouseEvent | TouchEvent) {
@@ -28,14 +27,12 @@
 	function stopDrawing() {
 		drawing = false;
 		ctx.closePath();
-		console.debug('Stopped drawing');
 		saveDrawing();
 	}
 
 	function saveDrawing() {
 		const imageData = canvas.toDataURL('image/png');
 		localStorage.setItem(STORAGE_KEY, imageData);
-		console.debug('Drawing saved to localStorage');
 	}
 
 	function loadDrawing() {
@@ -44,7 +41,6 @@
 			const img = new Image();
 			img.onload = () => {
 				ctx.drawImage(img, 0, 0);
-				console.debug('Drawing loaded from localStorage');
 			};
 			img.src = imageData;
 		}

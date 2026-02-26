@@ -86,7 +86,6 @@ export async function fetchWeather(location: CityLocation): Promise<Weather> {
 
 	// FMI returns multiple parameters per timestamp. The order is defined in parameters.
 	// With temperature,weathersymbol3 the tuple order is: temperature weathersymbol3
-	console.log(tuples[0]);
 	const firstTuple = tuples[0].trim().split(/\s+/);
 	if (firstTuple.length >= 2) {
 		temperature = parseFloat(firstTuple[0]);
