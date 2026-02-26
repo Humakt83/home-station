@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-  type DrawingColors = 'black' | 'red' | 'blue' | 'green'
+	type DrawingColors = 'black' | 'red' | 'blue' | 'green';
 
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
 	let drawing = false;
 	let currentColor: DrawingColors = 'black';
+	const STORAGE_KEY = 'drawing_canvas';
 
 	function startDrawing(event: MouseEvent | TouchEvent) {
 		drawing = true;
@@ -29,10 +30,31 @@
 		drawing = false;
 		ctx.closePath();
 		console.debug('Stopped drawing');
+		saveDrawing();
+	}
+
+	function saveDrawing() {
+		const imageData = canvas.toDataURL('image/png');
+		localStorage.setItem(STORAGE_KEY, imageData);
+		hasUnsavedChanges = false;
+		console.debug('Drawing saved to localStorage');
+	}
+
+	function loadDrawing() {
+		const imageData = localStorage.getItem(STORAGE_KEY);
+		if (imageData) {
+			const img = new Image();
+			img.onload = () => {
+				ctx.drawImage(img, 0, 0);
+				console.debug('Drawing loaded from localStorage');
+			};
+			img.src = imageData;
+		}
 	}
 
 	function clearDrawing() {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		saveDrawing();
 	}
 
 	function setColor(color: DrawingColors) {
@@ -75,6 +97,7 @@
 		if (canv) {
 			ctx = canv;
 			resizeCanvas();
+			loadDrawing();
 			window.addEventListener('resize', resizeCanvas);
 		}
 	});
@@ -85,8 +108,8 @@
 		<button on:click={clearDrawing}>🗑️</button>
 		<button on:click={() => setColor('black')} class:active={currentColor === 'black'}>⚫</button>
 		<button on:click={() => setColor('red')} class:active={currentColor === 'red'}>🔴</button>
-    <button on:click={() => setColor('blue')} class:active={currentColor === 'blue'}>🔵</button>
-    <button on:click={() => setColor('green')} class:active={currentColor === 'green'}>🟢</button>
+		<button on:click={() => setColor('blue')} class:active={currentColor === 'blue'}>🔵</button>
+		<button on:click={() => setColor('green')} class:active={currentColor === 'green'}>🟢</button>
 	</div>
 	<canvas
 		bind:this={canvas}
