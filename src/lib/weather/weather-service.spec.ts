@@ -1,4 +1,4 @@
-// @vitest-environment node
+// @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { fetchWeather } from './weather-service';
 import type { CityLocation } from './weather-types';
@@ -7,7 +7,7 @@ describe('fetchWeather', () => {
 	const mockLocation: CityLocation = {
 		lat: 60.1699,
 		lon: 24.9384,
-		city: 'Järvenpää'
+		city: 'Helsinki'
 	};
 
 	beforeEach(() => {
@@ -19,48 +19,50 @@ describe('fetchWeather', () => {
 	});
 
 	it('fetches weather data and returns parsed result', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 5.2,
-				weathercode: 0,
-				time: '2026-02-26T12:00'
-			},
-			hourly: {
-				time: ['2026-02-26T12:00'],
-				apparent_temperature: [3.5]
-			}
-		};
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							5.2 1
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
 
 		expect(result.location).toEqual(mockLocation);
 		expect(result.temperature).toBe(5.2);
-		expect(result.feelsLike).toBe(3.5);
+		expect(result.feelsLike).toBe(5.2);
 		expect(result.conditionEmoji).toBe('☀️');
 		expect(result.conditionLabel).toBe('Sunny');
 	});
 
-	it('maps weathercode 71 (snow) correctly', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: -2,
-				weathercode: 71,
-				time: '2026-02-26T12:00'
-			},
-			hourly: {
-				time: ['2026-02-26T12:00'],
-				apparent_temperature: [-5]
-			}
-		};
+	it('maps FMI weather symbol 22 (snow) correctly', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							-2 22
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
@@ -69,22 +71,23 @@ describe('fetchWeather', () => {
 		expect(result.conditionLabel).toBe('Snowing');
 	});
 
-	it('maps weathercode 61 (rain) correctly', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 8,
-				weathercode: 61,
-				time: '2026-02-26T12:00'
-			},
-			hourly: {
-				time: ['2026-02-26T12:00'],
-				apparent_temperature: [6]
-			}
-		};
+	it('maps FMI weather symbol 6 (rain) correctly', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							8 6
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
@@ -93,22 +96,23 @@ describe('fetchWeather', () => {
 		expect(result.conditionLabel).toBe('Raining');
 	});
 
-	it('maps unknown weathercode to cloudy', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 10,
-				weathercode: 2,
-				time: '2026-02-26T12:00'
-			},
-			hourly: {
-				time: ['2026-02-26T12:00'],
-				apparent_temperature: [9]
-			}
-		};
+	it('maps FMI weather symbol 3 (cloudy) correctly', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							10 3
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
@@ -118,51 +122,53 @@ describe('fetchWeather', () => {
 	});
 
 	it('finds nearest hourly timestamp when exact match not found', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 5,
-				weathercode: 0,
-				time: '2026-02-26T12:30' // Not exact match
-			},
-			hourly: {
-				time: ['2026-02-26T12:00', '2026-02-26T13:00'],
-				apparent_temperature: [3, 4]
-			}
-		};
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							3.5 2
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
 
-		// 12:30 is closer to 12:00, so should use index 0
-		expect(result.feelsLike).toBe(3);
+		expect(result.temperature).toBe(3.5);
+		expect(result.feelsLike).toBe(3.5);
 	});
 
 	it('handles missing apparent_temperature gracefully', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 5,
-				weathercode: 0,
-				time: '2026-02-26T12:00'
-			},
-			hourly: {
-				time: ['2026-02-26T12:00'],
-				apparent_temperature: [undefined]
-			}
-		};
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							5 1
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
 
 		expect(result.temperature).toBe(5);
-		expect(result.feelsLike).toBeNull();
+		expect(result.feelsLike).toBe(5);
 	});
 
 	it('throws error on non-ok response status', async () => {
@@ -171,65 +177,82 @@ describe('fetchWeather', () => {
 			status: 404
 		});
 
-		await expect(fetchWeather(mockLocation)).rejects.toThrow('Weather API error: 404');
+		await expect(fetchWeather(mockLocation)).rejects.toThrow('FMI API error: 404');
 	});
 
-	it('throws error when no current weather available', async () => {
-		const mockResponse = {
-			current_weather: null
-		};
+	it('throws error when no weather data available', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList></gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
-		await expect(fetchWeather(mockLocation)).rejects.toThrow('No current weather available');
+		await expect(fetchWeather(mockLocation)).rejects.toThrow('No weather data available from FMI');
 	});
 
-	it('constructs correct API URL with location coordinates', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 5,
-				weathercode: 0,
-				time: '2026-02-26T12:00'
-			},
-			hourly: {
-				time: ['2026-02-26T12:00'],
-				apparent_temperature: [3]
-			}
-		};
+	it('constructs correct FMI API URL with place name', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							5 1
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		const fetchSpy = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		global.fetch = fetchSpy;
 
 		await fetchWeather(mockLocation);
 
-		expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('latitude=60.1699'));
-		expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('longitude=24.9384'));
+		expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('place=Helsinki'));
+		expect(fetchSpy).toHaveBeenCalledWith(expect.stringContaining('fmi::forecast::harmonie'));
 	});
 
-	it('handles missing hourly data', async () => {
-		const mockResponse = {
-			current_weather: {
-				temperature: 5,
-				weathercode: 0,
-				time: '2026-02-26T12:00'
-			}
-		};
+	it('parses XML with multiple weather values', async () => {
+		const fmiXml = `<?xml version="1.0" encoding="UTF-8"?>
+		<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0">
+			<wfs:member>
+				<gmlcov:rangeSet>
+					<gml:DataBlock>
+						<gml:doubleOrNilReasonTupleList>
+							3.5 2
+							4.1 2
+							5.0 1
+						</gml:doubleOrNilReasonTupleList>
+					</gml:DataBlock>
+				</gmlcov:rangeSet>
+			</wfs:member>
+		</wfs:FeatureCollection>`;
 
 		global.fetch = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => mockResponse
+			text: async () => fmiXml
 		});
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.temperature).toBe(5);
-		expect(result.feelsLike).toBeNull();
+		// Should use first tuple
+		expect(result.temperature).toBe(3.5);
+		expect(result.feelsLike).toBe(3.5);
+		expect(result.conditionLabel).toBe('Cloudy');
 	});
 });
