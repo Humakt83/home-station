@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
-	type DrawingColors = 'black' | 'red' | 'blue' | 'green';
+	import type { DrawingColors } from './note-types';
 
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
@@ -36,7 +35,6 @@
 	function saveDrawing() {
 		const imageData = canvas.toDataURL('image/png');
 		localStorage.setItem(STORAGE_KEY, imageData);
-		hasUnsavedChanges = false;
 		console.debug('Drawing saved to localStorage');
 	}
 
