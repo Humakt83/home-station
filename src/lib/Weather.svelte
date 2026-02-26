@@ -128,7 +128,7 @@
 
 <div class="weather">
 	{#if loading}
-		<div>Loading weather data…</div>
+		<div>Ladataan säätietoja…</div>
 	{:else if error}
 		<div class="error">Error: {error}</div>
 	{:else}

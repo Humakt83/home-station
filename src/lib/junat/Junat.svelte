@@ -24,7 +24,7 @@
 <div class="junat">
 	<div class="title">Lähtevät Junat</div>
 	{#if loading}
-		<div>Loading departures…</div>
+		<div>Ladataan…</div>
 	{:else if error}
 		<div class="error">{error}</div>
 	{:else}
