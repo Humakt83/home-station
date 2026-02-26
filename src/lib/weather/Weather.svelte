@@ -70,9 +70,6 @@
 		font-size: 1.25rem;
 		margin-top: 0.25rem;
 	}
-	.error {
-		color: #b00020;
-	}
 	.loc {
 		font-size: 0.85rem;
 		color: #666;
