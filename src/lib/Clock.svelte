@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { formatDate } from 'date-fns';
+	import { fi } from 'date-fns/locale'
 
 	const time = writable(new Date());
 	let timer: NodeJS.Timeout;
@@ -16,6 +17,7 @@
 <div class="clock">
 	{#if $time}
 		<time datetime={$time.toISOString()}>{formatDate($time, 'HH:mm:ss')}</time>
+		<time class="pvm" datetime={$time.toISOString()}>{formatDate($time, 'EEEE', {locale: fi})}</time>
 		<time class="pvm" datetime={$time.toISOString()}>{formatDate($time, 'dd.M.yyyy')}</time>
 	{/if}
 </div>
@@ -34,12 +36,11 @@
 			Arial;
 		font-size: 2.5rem;
 		font-weight: 600;
-		color: red;
-		background: black;
+		color: white;
+		background: rgb(32, 73, 73);
 		padding: 1rem 2rem;
 		width: fit;
 	}
-
 	.pvm {
 		font-size: 1.5rem;
 		margin-left: 0.5rem;

@@ -1,1 +1,1 @@
-export type DrawingColors = 'black' | 'red' | 'blue' | 'green';
+export type DrawingColors = 'black' | 'red' | 'blue' | 'green' | 'white';

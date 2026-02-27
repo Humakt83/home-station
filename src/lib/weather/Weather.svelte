@@ -40,10 +40,10 @@
 					<div class="temp">{Math.round(weather.temperature)} °C</div>
 				{/if}
 				{#if typeof weather.feelsLike === 'number'}
-					<div class="feels">Feels like {Math.round(weather.feelsLike)} °C</div>
+					<div class="feels">Tuntuu kuin {Math.round(weather.feelsLike)} °C</div>
 				{/if}
 				{#if weather.conditionEmoji}
-					<div class="cond">{weather.conditionEmoji} {weather.conditionLabel}</div>
+					<div class="cond">{weather.conditionEmoji} <span class="cond-label">{weather.conditionLabel}</span></div>
 				{/if}
 			</div>
 		{/each}
@@ -67,20 +67,20 @@
 		height: 20vh;
 	}
 
-	.city {
-
-	}
-
 	.temp {
-		font-size: 1.25rem;
+		font-size: 1.5rem;
 		font-weight: 600;
 	}
 	.feels {
-		font-size: 1rem;
+		font-size: 0.85rem;
 	}
 	.cond {
-		font-size: 1.25rem;
+		font-size: 2rem;
 		margin-top: 0.25rem;
+		.cond-label {
+			vertical-align: middle;
+			font-size: 0.85rem;	
+		}
 	}
 	.loc {
 		font-size: 1.5rem;

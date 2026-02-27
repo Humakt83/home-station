@@ -5,6 +5,7 @@
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
 	let drawing = false;
+	let lineWidth = 5;
 	let currentColor: DrawingColors = 'black';
 	const STORAGE_KEY = 'drawing_canvas';
 
@@ -18,7 +19,7 @@
 	function draw(event: MouseEvent | TouchEvent) {
 		if (!drawing) return;
 		const pos = getPos(event);
-		ctx.lineWidth = 5;
+		ctx.lineWidth = lineWidth;
 		ctx.lineTo(pos.x, pos.y);
 		ctx.strokeStyle = currentColor;
 		ctx.stroke();
@@ -52,6 +53,11 @@
 	}
 
 	function setColor(color: DrawingColors) {
+		if (color === 'white') {
+			lineWidth = 50;
+		} else {
+			lineWidth = 5;
+		}
 		currentColor = color;
 	}
 
@@ -104,6 +110,7 @@
 		<button on:click={() => setColor('red')} class:active={currentColor === 'red'}>🔴</button>
 		<button on:click={() => setColor('blue')} class:active={currentColor === 'blue'}>🔵</button>
 		<button on:click={() => setColor('green')} class:active={currentColor === 'green'}>🟢</button>
+		<button on:click={() => setColor('white')} class:active={currentColor === 'white'}>⚪</button>
 	</div>
 	<canvas
 		bind:this={canvas}
