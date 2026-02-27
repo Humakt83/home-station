@@ -34,22 +34,28 @@
 		<div>Ladataan säätietoja…</div>
 	{:else}
 		{#each weathers as weather (weather.location.city)}
-			{#if weather.temperature}
-				<div class="temp">{Math.round(weather.temperature)} °C</div>
-			{/if}
-			{#if typeof weather.feelsLike === 'number'}
-				<div class="feels">Feels like {Math.round(weather.feelsLike)} °C</div>
-			{/if}
-			{#if weather.conditionEmoji}
-				<div class="cond">{weather.conditionEmoji} {weather.conditionLabel}</div>
-			{/if}
-			<div class="loc">{weather.location.city}</div>
+			<div class="city">
+				<div class="loc">{weather.location.city}</div>
+				{#if weather.temperature}
+					<div class="temp">{Math.round(weather.temperature)} °C</div>
+				{/if}
+				{#if typeof weather.feelsLike === 'number'}
+					<div class="feels">Feels like {Math.round(weather.feelsLike)} °C</div>
+				{/if}
+				{#if weather.conditionEmoji}
+					<div class="cond">{weather.conditionEmoji} {weather.conditionLabel}</div>
+				{/if}
+			</div>
 		{/each}
 	{/if}
 </div>
 
 <style>
 	.weather {
+		grid-area: weather;
+		display: flex;
+		flex-direction: row;
+		column-gap: 2rem;
 		font-family:
 			system-ui,
 			-apple-system,
@@ -58,7 +64,13 @@
 			Arial;
 		padding: 0.5rem 1rem;
 		background: lightskyblue;
+		height: 20vh;
 	}
+
+	.city {
+
+	}
+
 	.temp {
 		font-size: 1.25rem;
 		font-weight: 600;
@@ -71,7 +83,6 @@
 		margin-top: 0.25rem;
 	}
 	.loc {
-		font-size: 0.85rem;
-		color: #666;
+		font-size: 1.5rem;
 	}
 </style>

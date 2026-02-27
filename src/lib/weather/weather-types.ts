@@ -14,5 +14,7 @@ export type Weather = {
 
 export const LOCATIONS: Array<CityLocation> = [
 	{ lat: 60.1699, lon: 24.9384, city: 'Järvenpää' },
-	{ lat: 60.1708, lon: 24.9375, city: 'Helsinki' }
+	{ lat: 60.1708, lon: 24.9375, city: 'Helsinki' },
+	{ lat: 60.1708, lon: 24.9375, city: 'Kalajoki' },
+	{ lat: 60.1708, lon: 24.9375, city: 'Sotkamo' }
 ];

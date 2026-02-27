@@ -6,8 +6,23 @@
 </script>
 
 <section>
-	<Clock />
-	<Weather />
-	<Junat />
-	<Note />
+	<div class="dashboard">
+		<Clock />
+		<Weather />
+		<Junat />
+		<Note />
+	</div>
 </section>
+
+<style>
+
+	.dashboard {
+		max-width: 100%;
+		display: grid;
+		grid-template-areas: 
+			"weather weather clock"
+			"train note note"
+			"train note note";
+	}
+
+</style>

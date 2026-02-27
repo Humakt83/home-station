@@ -47,6 +47,7 @@
 
 <style>
 	.junat {
+		grid-area: train;
 		font-family:
 			system-ui,
 			-apple-system,

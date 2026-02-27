@@ -16,11 +16,15 @@
 <div class="clock">
 	{#if $time}
 		<time datetime={$time.toISOString()}>{formatDate($time, 'HH:mm:ss')}</time>
+		<time class="pvm" datetime={$time.toISOString()}>{formatDate($time, 'dd.M.yyyy')}</time>
 	{/if}
 </div>
 
 <style>
 	.clock {
+		display: flex;
+		flex-direction: column;
+		grid-area: clock;
 		font-family:
 			system-ui,
 			-apple-system,
@@ -34,5 +38,10 @@
 		background: black;
 		padding: 1rem 2rem;
 		width: fit;
+	}
+
+	.pvm {
+		font-size: 1.5rem;
+		margin-left: 0.5rem;
 	}
 </style>
