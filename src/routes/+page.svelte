@@ -3,6 +3,7 @@
 	import Weather from '$lib/weather/Weather.svelte';
 	import Junat from '$lib/junat/Junat.svelte';
 	import Note from '$lib/notes/Note.svelte';
+	import Reminders from '$lib/reminders/Reminders.svelte';
 </script>
 
 <section>
@@ -11,6 +12,7 @@
 		<Weather />
 		<Junat />
 		<Note />
+		<Reminders />
 	</div>
 </section>
 
@@ -21,6 +23,7 @@
 		grid-template-areas:
 			'weather weather clock'
 			'train note note'
-			'train note note';
+			'train note note'
+			'reminder reminder reminder';
 	}
 </style>
