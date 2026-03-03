@@ -87,10 +87,10 @@ describe('fetchWeather', () => {
 		const result = await fetchWeather(mockLocation);
 
 		expect(result.location).toEqual(mockLocation);
-		expect(result.temperature).toBe(15);
-		expect(result.feelsLike).toBe(15);
-		expect(result.conditionEmoji).toBe('☀️');
-		expect(result.conditionLabel).toBe('Sunny');
+		expect(result.weathers[0].temperature).toBe(15);
+		expect(result.weathers[0].feelsLike).toBe(15);
+		expect(result.weathers[0].conditionEmoji).toBe('☀️');
+		expect(result.weathers[0].conditionLabel).toBe('Aurinkoista');
 	});
 
 	it('maps FMI weather symbol 22 (snow) correctly', async () => {
@@ -114,8 +114,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.conditionEmoji).toBe('❄️');
-		expect(result.conditionLabel).toBe('Snowing');
+		expect(result.weathers[0].conditionEmoji).toBe('❄️');
+		expect(result.weathers[0].conditionLabel).toBe('Lumisadetta');
 	});
 
 	it('maps FMI weather symbol 6 (rain) correctly', async () => {
@@ -139,8 +139,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.conditionEmoji).toBe('🌧️');
-		expect(result.conditionLabel).toBe('Raining');
+		expect(result.weathers[0].conditionEmoji).toBe('🌧️');
+		expect(result.weathers[0].conditionLabel).toBe('Sadetta');
 	});
 
 	it('maps FMI weather symbol 3 (cloudy) correctly', async () => {
@@ -164,8 +164,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.conditionEmoji).toBe('☁️');
-		expect(result.conditionLabel).toBe('Cloudy');
+		expect(result.weathers[0].conditionEmoji).toBe('☁️');
+		expect(result.weathers[0].conditionLabel).toBe('Pilvistä');
 	});
 
 	it('maps FMI weather symbol 71 (sleet) correctly', async () => {
@@ -189,8 +189,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.conditionEmoji).toBe('🌨️');
-		expect(result.conditionLabel).toBe('Sleet');
+		expect(result.weathers[0].conditionEmoji).toBe('🌨️');
+		expect(result.weathers[0].conditionLabel).toBe('Räntää');
 	});
 
 	it('maps FMI weather symbol 91 (fog) correctly', async () => {
@@ -214,8 +214,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.conditionEmoji).toBe('🌫️');
-		expect(result.conditionLabel).toBe('Fog');
+		expect(result.weathers[0].conditionEmoji).toBe('🌫️');
+		expect(result.weathers[0].conditionLabel).toBe('Sumua');
 	});
 
 	it('finds nearest hourly timestamp when exact match not found', async () => {
@@ -239,8 +239,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.temperature).toBe(18);
-		expect(result.feelsLike).toBe(18);
+		expect(result.weathers[0].temperature).toBe(18);
+		expect(result.weathers[0].feelsLike).toBe(18);
 	});
 
 	it('handles missing apparent_temperature gracefully', async () => {
@@ -264,8 +264,8 @@ describe('fetchWeather', () => {
 
 		const result = await fetchWeather(mockLocation);
 
-		expect(result.temperature).toBe(22);
-		expect(result.feelsLike).toBe(22);
+		expect(result.weathers[0].temperature).toBe(22);
+		expect(result.weathers[0].feelsLike).toBe(22);
 	});
 
 	it('throws error on non-ok response status', async () => {
@@ -348,8 +348,8 @@ describe('fetchWeather', () => {
 		const result = await fetchWeather(mockLocation);
 
 		// Should use first tuple
-		expect(result.temperature).toBe(20);
-		expect(result.feelsLike).toBe(20);
-		expect(result.conditionLabel).toBe('Cloudy');
+		expect(result.weathers[0].temperature).toBe(20);
+		expect(result.weathers[0].feelsLike).toBe(20);
+		expect(result.weathers[0].conditionLabel).toBe('Pilvistä');
 	});
 });

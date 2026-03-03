@@ -5,11 +5,16 @@ export type CityLocation = {
 };
 
 export type Weather = {
-	location: CityLocation;
 	temperature: number | null;
 	feelsLike: number | null;
 	conditionEmoji: string | null;
 	conditionLabel: string | null;
+	hourFromNow: number;
+};
+
+export type CityWeather = {
+	location: CityLocation;
+	weathers: Array<Weather>;
 };
 
 export const LOCATIONS: Array<CityLocation> = [

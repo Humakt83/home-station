@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { LOCATIONS, type Weather } from './weather-types';
+	import { LOCATIONS, type CityWeather } from './weather-types';
 	import { fetchWeather } from './weather-service';
+	import { addHours, formatDate } from 'date-fns';
 
-	let weathers: Array<Weather> = [];
+	let weathers: Array<CityWeather> = [];
 	let loading = true;
 	let refreshTimer: number | null = null;
+	let displaySingleWeather: CityWeather | null = null;
 
 	onMount(async () => {
 		weathers = await Promise.all(LOCATIONS.map((loc) => fetchWeather(loc)));
@@ -32,21 +34,56 @@
 <div class="weather">
 	{#if loading}
 		<div>Ladataan säätietoja…</div>
-	{:else}
-		{#each weathers as weather (weather.location.city)}
+	{:else if !displaySingleWeather}
+		{#each weathers as cityWeather (cityWeather.location.city)}
 			<div class="city">
-				<div class="loc">{weather.location.city}</div>
-				{#if weather.temperature}
-					<div class="temp">{Math.round(weather.temperature)} °C</div>
+				<div class="loc">
+					<button on:click={() => (displaySingleWeather = cityWeather)}
+						>{cityWeather.location.city}</button
+					>
+				</div>
+				{#if cityWeather.weathers[0]?.temperature}
+					<div class="temp">{Math.round(cityWeather.weathers[0]?.temperature)} °C</div>
 				{/if}
-				{#if typeof weather.feelsLike === 'number'}
-					<div class="feels">Tuntuu kuin {Math.round(weather.feelsLike)} °C</div>
+				{#if typeof cityWeather.weathers[0]?.feelsLike === 'number'}
+					<div class="feels">Tuntuu kuin {Math.round(cityWeather.weathers[0]?.feelsLike)} °C</div>
 				{/if}
-				{#if weather.conditionEmoji}
-					<div class="cond">{weather.conditionEmoji} <span class="cond-label">{weather.conditionLabel}</span></div>
+				{#if cityWeather.weathers[0]?.conditionEmoji}
+					<div class="cond">
+						{cityWeather.weathers[0]?.conditionEmoji}
+						<span class="cond-label">{cityWeather.weathers[0]?.conditionLabel}</span>
+					</div>
 				{/if}
 			</div>
 		{/each}
+	{:else}
+		<div class="cityWeather">
+			<div class="loc">
+				<button on:click={() => (displaySingleWeather = null)}
+					>{displaySingleWeather.location.city}</button
+				>
+			</div>
+			<div class="weatherForecast">
+				{#each displaySingleWeather.weathers as weather (weather.hourFromNow)}
+					<div class="weatherTime">
+						<div class="time">
+							<time datetime={addHours(new Date(), weather.hourFromNow)}
+								>{formatDate(addHours(new Date(), weather.hourFromNow), 'H')}</time
+							>
+						</div>
+						{#if weather.conditionEmoji}
+							<div class="cond">{weather.conditionEmoji}</div>
+						{/if}
+						{#if weather.temperature}
+							<div class="temp">{Math.round(weather.temperature)} °C</div>
+						{/if}
+						{#if typeof weather.feelsLike === 'number'}
+							<div class="feels">({Math.round(weather.feelsLike)})</div>
+						{/if}
+					</div>
+				{/each}
+			</div>
+		</div>
 	{/if}
 </div>
 
@@ -63,8 +100,9 @@
 			Roboto,
 			Arial;
 		padding: 0.5rem 1rem;
-		background: lightskyblue;
+		background: lightseagreen;
 		height: 20vh;
+		overflow: hidden;
 	}
 
 	.temp {
@@ -79,10 +117,40 @@
 		margin-top: 0.25rem;
 		.cond-label {
 			vertical-align: middle;
-			font-size: 0.85rem;	
+			font-size: 0.85rem;
 		}
 	}
 	.loc {
 		font-size: 1.5rem;
+		button {
+			cursor: pointer;
+			padding: 0.1rem 0.5rem;
+			&:hover,
+			&:focus {
+				background-color: darkcyan;
+			}
+		}
+	}
+
+	.cityWeather {
+		overflow-x: auto;
+		.loc {
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+		.weatherForecast {
+			display: flex;
+			flex-direction: row;
+			column-gap: 2rem;
+
+			.weatherTime {
+				text-align: center;
+			}
+
+			.temp {
+				font-size: 1rem;
+				font-weight: normal;
+			}
+		}
 	}
 </style>
