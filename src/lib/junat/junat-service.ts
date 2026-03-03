@@ -4,7 +4,7 @@ import { determineDestination, isLegitDeparture } from './junat-util';
 
 const trainNumberToCommuterLineId: Array<Train> = [];
 
-const MAX_DEPARTURES = 15;
+const MAX_DEPARTURES = 25;
 
 const TRAIN_API = 'https://rata.digitraffic.fi/api/v1/trains';
 const DEPARTURES_API =

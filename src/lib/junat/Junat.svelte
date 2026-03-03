@@ -22,7 +22,7 @@
 </script>
 
 <div class="junat">
-	<div class="title">Lähtevät Junat</div>
+	<div class="title">Junat 🚊</div>
 	{#if loading}
 		<div>Ladataan…</div>
 	{:else if error}
@@ -36,7 +36,7 @@
 				{#each departures as d (d.scheduledTime)}
 					<li>
 						<span class="time">{formatDate(d.scheduledTime, 'HH:mm')}</span>
-						<span class="train">{d.train?.commuterLineID ?? ''}</span>
+						<span class={d.train?.commuterLineID ? 'train' : 'train-emoji'}>{d.train?.commuterLineID? d.train.commuterLineID : '🚊'}</span>
 						<span class="destination">{d.destination ?? ''}</span>
 					</li>
 				{/each}
@@ -57,6 +57,9 @@
 		background: darkgreen;
 		color: white;
 		padding: 1rem 0.5rem;
+		overflow: hidden;
+		overflow-y: auto;
+		height: 70vh;
 	}
 	.title {
 		font-size: 1.5rem;
@@ -65,12 +68,17 @@
 	.time {
 		font-weight: 600;
 	}
-	.train {
+	.train,	.train-emoji {
 		background-color: white;
 		color: darkgreen;
 		font-weight: bold;
 		padding: 0 0.5rem;
 	}
+	
+	.train-emoji {
+		padding: 0 0.15rem;
+	}
+
 	li {
 		display: flex;
 		flex-direction: row;
