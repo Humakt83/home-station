@@ -36,7 +36,9 @@
 				{#each departures as d (d.scheduledTime)}
 					<li>
 						<span class="time">{formatDate(d.scheduledTime, 'HH:mm')}</span>
-						<span class={d.train?.commuterLineID ? 'train' : 'train-emoji'}>{d.train?.commuterLineID? d.train.commuterLineID : '🚊'}</span>
+						<span class={d.train?.commuterLineID ? 'train' : 'train-emoji'}
+							>{d.train?.commuterLineID ? d.train.commuterLineID : '🚊'}</span
+						>
 						<span class="destination">{d.destination ?? ''}</span>
 					</li>
 				{/each}
@@ -68,13 +70,14 @@
 	.time {
 		font-weight: 600;
 	}
-	.train,	.train-emoji {
+	.train,
+	.train-emoji {
 		background-color: white;
 		color: darkgreen;
 		font-weight: bold;
 		padding: 0 0.5rem;
 	}
-	
+
 	.train-emoji {
 		padding: 0 0.15rem;
 	}

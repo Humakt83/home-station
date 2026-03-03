@@ -99,10 +99,14 @@
 			'Segoe UI',
 			Roboto,
 			Arial;
-		padding: 0.5rem 1rem;
+		padding: 1.5rem 1rem;
 		background: lightseagreen;
 		height: 20vh;
 		overflow: hidden;
+	}
+
+	.city {
+		text-align: center;
 	}
 
 	.temp {
