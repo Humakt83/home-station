@@ -1,4 +1,4 @@
-import type { CityLocation, Weather } from './weather-types';
+import type { CityLocation, CityWeather, Weather } from './weather-types';
 
 /**
  * Calculate apparent temperature (feels like) in Celsius
@@ -54,13 +54,38 @@ export function apparentTemperature(
 	return temperature;
 }
 
-export async function fetchWeather(location: CityLocation): Promise<Weather> {
+// Map weather symbol to emoji and label
+// FMI weather symbols: 1=clear, 2=partly cloudy, 3=cloudy
+// 31-33=rain, 41-53=snow, 61-64=thunderstorm, 71-83=sleet, 91-92=fog
+function mapWeatherSymbol(symbol: number) {
+	if (symbol === 1) return { emoji: '☀️', label: 'Aurinkoista' };
+	if (symbol === 2 || symbol === 3) return { emoji: '☁️', label: 'Pilvistä' };
+	if (symbol >= 31 && symbol <= 33) return { emoji: '🌧️', label: 'Sadetta' };
+	if (symbol >= 41 && symbol <= 53) return { emoji: '❄️', label: 'Lumisadetta' };
+	if (symbol >= 61 && symbol <= 64) return { emoji: '⛈️', label: 'Ukkosta' };
+	if (symbol >= 71 && symbol <= 83) return { emoji: '🌨️', label: 'Räntää' };
+	if (symbol >= 91 && symbol <= 92) return { emoji: '🌫️', label: 'Sumua' };
+	return { emoji: '☁️', label: 'Poutaa' };
+}
+
+// FMI returns multiple parameters per timestamp. The order is defined in parameters.
+// With temperature,weathersymbol3 the tuple order is: temperature weathersymbol3, humidity, windspeedMs
+function convertToWeather(tuple: Array<string>, index: number): Weather {
+	const temperature = parseFloat(tuple[0]);
+	const weatherSymbol = parseInt(tuple[1], 10);
+	const humidity = parseFloat(tuple[2]);
+	const windspeedms = parseFloat(tuple[3]);
+	const feelsLike = apparentTemperature(temperature, humidity, windspeedms);
+
+	const result = mapWeatherSymbol(weatherSymbol);
+	const conditionEmoji = result.emoji;
+	const conditionLabel = result.label;
+	return { temperature, feelsLike, conditionEmoji, conditionLabel, hourFromNow: index };
+}
+
+export async function fetchWeather(location: CityLocation): Promise<CityWeather> {
 	const url = `https://opendata.fmi.fi/wfs?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::forecast::harmonie::surface::point::multipointcoverage&place=${location.city}&parameters=temperature,weathersymbol3,humidity,windspeedms`;
 	const res = await fetch(url);
-	let temperature: number | null = null;
-	let feelsLike: number | null = null;
-	let conditionEmoji: string = '';
-	let conditionLabel: string = '';
 
 	if (!res.ok) throw new Error(`FMI API error: ${res.status}`);
 
@@ -84,34 +109,10 @@ export async function fetchWeather(location: CityLocation): Promise<Weather> {
 		throw new Error('No weather data available from FMI');
 	}
 
-	// FMI returns multiple parameters per timestamp. The order is defined in parameters.
-	// With temperature,weathersymbol3 the tuple order is: temperature weathersymbol3
-	const firstTuple = tuples[0].trim().split(/\s+/);
-	if (firstTuple.length >= 2) {
-		temperature = parseFloat(firstTuple[0]);
-		const weatherSymbol = parseInt(firstTuple[1], 10);
-		const humidity = parseFloat(firstTuple[2]);
-		const windspeedms = parseFloat(firstTuple[3]);
-		feelsLike = apparentTemperature(temperature, humidity, windspeedms);
+	const weathers = tuples
+		.map((t) => t.trim().split(/\s+/))
+		.filter((t) => t.length >= 2)
+		.map((t, idx) => convertToWeather(t, idx));
 
-		// Map weather symbol to emoji and label
-		// FMI weather symbols: 1=clear, 2=partly cloudy, 3=cloudy
-		// 31-33=rain, 41-53=snow, 61-64=thunderstorm, 71-83=sleet, 91-92=fog
-		function mapWeatherSymbol(symbol: number) {
-			if (symbol === 1) return { emoji: '☀️', label: 'Sunny' };
-			if (symbol === 2 || symbol === 3) return { emoji: '☁️', label: 'Cloudy' };
-			if (symbol >= 31 && symbol <= 33) return { emoji: '🌧️', label: 'Raining' };
-			if (symbol >= 41 && symbol <= 53) return { emoji: '❄️', label: 'Snowing' };
-			if (symbol >= 61 && symbol <= 64) return { emoji: '⛈️', label: 'Thunderstorm' };
-			if (symbol >= 71 && symbol <= 83) return { emoji: '🌨️', label: 'Sleet' };
-			if (symbol >= 91 && symbol <= 92) return { emoji: '🌫️', label: 'Fog' };
-			return { emoji: '☁️', label: 'Cloudy' };
-		}
-
-		const result = mapWeatherSymbol(weatherSymbol);
-		conditionEmoji = result.emoji;
-		conditionLabel = result.label;
-	}
-
-	return { location, temperature, feelsLike, conditionEmoji, conditionLabel };
+	return { location, weathers };
 }
