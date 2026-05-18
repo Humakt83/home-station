@@ -99,7 +99,7 @@
 			'Segoe UI',
 			Roboto,
 			Arial;
-		padding: 1.5rem 1rem;
+		padding: 0.5rem 0.5rem;
 		background: lightseagreen;
 		height: 20vh;
 		overflow: hidden;
@@ -110,7 +110,7 @@
 	}
 
 	.temp {
-		font-size: 1.5rem;
+		font-size: 1.25rem;
 		font-weight: 600;
 	}
 	.feels {
@@ -125,7 +125,7 @@
 		}
 	}
 	.loc {
-		font-size: 1.5rem;
+		font-size: 1rem;
 		button {
 			cursor: pointer;
 			padding: 0.1rem 0.5rem;
@@ -140,12 +140,12 @@
 		overflow-x: auto;
 		.loc {
 			text-align: center;
-			margin-bottom: 1rem;
+			font-weight: 600;
 		}
 		.weatherForecast {
 			display: flex;
 			flex-direction: row;
-			column-gap: 2rem;
+			column-gap: 1rem;
 
 			.weatherTime {
 				text-align: center;

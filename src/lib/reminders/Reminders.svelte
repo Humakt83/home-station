@@ -41,20 +41,24 @@
 		column-gap: 1rem;
 		align-items: center;
 		grid-area: reminder;
-		width: 100%;
 		height: 10vh;
 		padding-left: 1rem;
 		background-color: lightseagreen;
+		overflow: hidden;
+		overflow-x: auto;
 	}
 
 	.reminder {
 		border: 1px solid #ccc;
-		padding: 1rem 1.5rem;
+		padding: 0.5rem 0.75rem;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		display: flex;
 		flex-direction: row;
-		column-gap: 1rem;
+		column-gap: 0.15rem;
 		background-color: white;
+	}
+
+	@media only screen and (max-width: 800px) {
 	}
 
 	.close {
