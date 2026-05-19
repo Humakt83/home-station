@@ -4,6 +4,7 @@
 	import Junat from '$lib/junat/Junat.svelte';
 	import Note from '$lib/notes/Note.svelte';
 	import Reminders from '$lib/reminders/Reminders.svelte';
+	import Electricity from '$lib/electricity/Electricity.svelte';
 </script>
 
 <section>
@@ -13,6 +14,7 @@
 		<Junat />
 		<Note />
 		<Reminders />
+		<Electricity />
 	</div>
 </section>
 
@@ -24,6 +26,6 @@
 			'weather weather clock'
 			'train note note'
 			'train note note'
-			'reminder reminder reminder';
+			'electricity reminder reminder';
 	}
 </style>
