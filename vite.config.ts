@@ -17,5 +17,34 @@ export default defineConfig({
 				}
 			}
 		]
+	},
+	server: {
+		port: 5173,
+		host: 'localhost',
+		proxy: {
+			'/station/api': {
+				target: 'http://localhost:3000',
+				secure: false,
+        changeOrigin: false,
+				configure: (proxy) => {
+					proxy.on('error', (err) => console.log('proxy error', err));
+					proxy.on('proxyReq', (proxyReq, req) => {
+						console.log(
+							'Sending Request to the Target:',
+							req.method,
+							req.url,
+							proxyReq.host,
+						);
+					});
+					proxy.on('proxyRes', (proxyRes, req) => {
+						console.log(
+							'Received Response from the Target:',
+							proxyRes.statusCode,
+							req.url,
+						);
+					});
+				},
+			}
+		} 
 	}
 });
