@@ -16,7 +16,7 @@
 
 <div class="clock">
 	{#if $time}
-		<time datetime={$time.toISOString()}>{formatDate($time, 'HH:mm:ss')}</time>
+		<time datetime={$time.toISOString()}>{formatDate($time, 'HH:mm')}</time>
 		<time class="pvm" datetime={$time.toISOString()}
 			>{formatDate($time, 'EEEE', { locale: fi })}</time
 		>

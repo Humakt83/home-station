@@ -129,7 +129,7 @@
 	.note {
 		grid-area: note;
 		border: 3px solid #ccc;
-		height: 70vh;
+		height: 55vh;
 		display: flex;
 		flex-direction: column;
 	}

@@ -26,6 +26,7 @@
 			'weather weather clock'
 			'train note note'
 			'train note note'
+			'electricity reminder reminder'
 			'electricity reminder reminder';
 	}
 </style>

@@ -61,7 +61,7 @@
 		padding: 1rem 0.5rem;
 		overflow: hidden;
 		overflow-y: auto;
-		height: 70vh;
+		height: 55vh;
 	}
 	.title {
 		font-size: 1.5rem;

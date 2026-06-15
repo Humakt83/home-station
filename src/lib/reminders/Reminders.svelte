@@ -41,7 +41,7 @@
 		column-gap: 1rem;
 		align-items: center;
 		grid-area: reminder;
-		height: 10vh;
+		height: 25vh;
 		padding-left: 1rem;
 		background-color: lightseagreen;
 		overflow: hidden;
