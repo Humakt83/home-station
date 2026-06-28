@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import express from 'express';
 import { WebSocketServer } from 'ws';
-import { getActiveReminders } from './reminders/reminder.service.js';
+import { getUnsentReminders, removeClient } from './reminders/reminder.service.js';
 
 const app = express();
 const port = '3000';
@@ -26,13 +26,18 @@ const clients = new Set<import('ws').WebSocket>();
 
 wss.on('connection', (ws) => {
 	clients.add(ws);
-	ws.on('close', () => clients.delete(ws));
+	ws.on('close', () => {
+		clients.delete(ws);
+		removeClient(ws);
+	});
 });
 
 setInterval(() => {
-	const payload = JSON.stringify(getActiveReminders());
 	for (const client of clients) {
-		client.send(payload);
+		const reminders = getUnsentReminders(client);
+		if (reminders.length > 0) {
+			client.send(JSON.stringify(reminders));
+		}
 	}
 }, 1000 * 60 * 5);
 
