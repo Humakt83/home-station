@@ -13,16 +13,19 @@ npm run test        # Run unit tests + E2E tests
 ```
 
 Run a single unit test file:
+
 ```bash
 npm run test:unit -- --run src/lib/path/to/file.test.ts
 ```
 
 Type-check the frontend:
+
 ```bash
 npm run check
 ```
 
 Type-check the server:
+
 ```bash
 cd server && npm run type-check
 ```
@@ -39,6 +42,7 @@ Vite proxies all `/station/api` requests from the frontend to the Express server
 ### Widget pattern
 
 Each dashboard feature lives in `src/lib/<feature>/` and typically contains:
+
 - `<Feature>.svelte` — the UI component
 - `<feature>Service.ts` — data fetching (calls `/station/api/<feature>`)
 

@@ -1,27 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Reminder } from './reminder-types';
-	import { pollForRemindersToBeShown } from './reminder-service';
+	import { subscribeToReminders } from './reminder-service';
 
 	let reminders: Reminder[] = [];
 
-	const POLLING_INTERVAL = 5 * 60 * 1000;
-
 	function close(id: string) {
-		console.log('Closing');
 		reminders = reminders.filter((r) => r.id !== id);
 	}
 
 	onMount(() => {
-		reminders = pollForRemindersToBeShown();
-		console.log('Reminder', reminders);
-		const interval = window.setInterval(() => {
-			reminders = pollForRemindersToBeShown();
-		}, POLLING_INTERVAL);
-
-		return () => {
-			clearInterval(interval);
-		};
+		return subscribeToReminders((r) => (reminders = r));
 	});
 </script>
 

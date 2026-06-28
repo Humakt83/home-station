@@ -95,14 +95,13 @@
 </div>
 
 <style>
-
 	.title {
 		font-weight: 700;
 	}
 
 	.electricity {
 		grid-area: electricity;
-		background-color: yellow; 
+		background-color: yellow;
 		height: 25vh;
 	}
 
