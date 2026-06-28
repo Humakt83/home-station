@@ -10,7 +10,9 @@
 	}
 
 	onMount(() => {
-		return subscribeToReminders((r) => (reminders = r));
+		return subscribeToReminders((remindersReceived) =>
+			reminders = reminders.concat(remindersReceived.filter(r => !reminders.find(reminder => reminder.id === r.id)))
+		);
 	});
 </script>
 

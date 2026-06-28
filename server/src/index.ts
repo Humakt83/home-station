@@ -16,16 +16,25 @@ app.get(STATION_API + '/electricity', async (_req, res) => {
 	console.log('Fetching electricity');
 	const response = await fetch('https://api.porssisahko.net/v2/latest-prices.json');
 	const data = (await response.json()) as { prices: unknown };
-	console.log('Electricity response', data);
+	//console.debug('Electricity response', data);
 	res.json(data.prices);
 });
 
 const server = createServer(app);
 const wss = new WebSocketServer({ noServer: true });
+const clients = new Set<import('ws').WebSocket>();
 
 wss.on('connection', (ws) => {
-	ws.send(JSON.stringify(getActiveReminders()));
+	clients.add(ws);
+	ws.on('close', () => clients.delete(ws));
 });
+
+setInterval(() => {
+	const payload = JSON.stringify(getActiveReminders());
+	for (const client of clients) {
+		client.send(payload);
+	}
+}, 1000 * 60 * 5);
 
 server.on('upgrade', (request, socket, head) => {
 	if (request.url === `${STATION_API}/ws/reminders`) {

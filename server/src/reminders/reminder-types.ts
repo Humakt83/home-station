@@ -9,7 +9,7 @@ const AQUARIUM_MAINTENANCE: Reminder = {
 	id: 'aquarium-maintenance',
 	message: 'Muista hoitaa akvaariota 🐠',
 	occurs: 'MONTHLY',
-	when: 1
+	when: 10
 };
 
 const NUOHOOJA: Reminder = {
@@ -40,4 +40,10 @@ const RANNIT: Reminder = {
 	when: 10
 };
 
-export const REMINDERS: Array<Reminder> = [AQUARIUM_MAINTENANCE, NUOHOOJA, TAXES, HEATING, RANNIT];
+export const REMINDERS: Array<Reminder> = [
+	AQUARIUM_MAINTENANCE,
+	NUOHOOJA,
+	TAXES,
+	HEATING,
+	RANNIT,
+];
