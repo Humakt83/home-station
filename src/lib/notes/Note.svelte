@@ -129,8 +129,7 @@
 	.note {
 		grid-area: note;
 		border: 3px solid #ccc;
-		width: 100%;
-		height: 70vh;
+		height: 55vh;
 		display: flex;
 		flex-direction: column;
 	}
@@ -160,5 +159,7 @@
 	canvas {
 		touch-action: none;
 		flex: 1;
+		width: 80vmin;
+		height: 40vmin;
 	}
 </style>
